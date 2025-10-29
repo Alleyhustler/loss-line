@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loss Line</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+            line-height: 1.4;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            pointer-events: none;
+            background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" /%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)" /%3E%3C/svg%3E');
+            animation: grain 8s steps(10) infinite;
+        }
+
+        @keyframes grain {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-5%, -5%); }
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 95%;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .left-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header {
+            text-align: center;
+        }
+        .logo {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 15px;
+            background: #1a1a1a;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.9;
+            overflow: hidden;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 400;
+            color: #c4c2c2;
+            letter-spacing: 6px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .twitter-link {
+            display: inline-block;
+            color: #b4b2b2;
+            text-decoration: none;
+            font-size: 11px;
+            padding: 6px 12px;
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+        }
+
+        .twitter-link:hover {
+            color: #888;
+            border-color: #4906ff;
+        }
+
+        .live-section {
+            background: #111;
+            border: 1px solid #222;
+            padding: 25px;
+            position: relative;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-direction: column;
+        }
+
+        .countdown-label {
+            color: #8d8c8c;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .countdown-timer {
+            color: #4906ff;
+            font-size: 24px;
+            letter-spacing: 2px;
+            font-weight: 400;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .live-active {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #ff3333;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.9); }
+        }
+
+        .live-text {
+            color: #ff3333;
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .waveform {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            height: 40px;
+            margin-bottom: 20px;
+        }
+
+        .bar {
+            width: 3px;
+            background: #333;
+            animation: wave 1.2s ease-in-out infinite;
+        }
+
+        .bar:nth-child(1) { animation-delay: 0s; }
+        .bar:nth-child(2) { animation-delay: 0.1s; }
+        .bar:nth-child(3) { animation-delay: 0.2s; }
+        .bar:nth-child(4) { animation-delay: 0.3s; }
+        .bar:nth-child(5) { animation-delay: 0.4s; }
+        .bar:nth-child(6) { animation-delay: 0.5s; }
+        .bar:nth-child(7) { animation-delay: 0.4s; }
+        .bar:nth-child(8) { animation-delay: 0.3s; }
+        .bar:nth-child(9) { animation-delay: 0.2s; }
+        .bar:nth-child(10) { animation-delay: 0.1s; }
+
+        @keyframes wave {
+            0%, 100% { height: 15px; }
+            50% { height: 40px; }
+        }
+
+        .audio-player {
+            background: #0a0a0a;
+            border: 1px solid #222;
+            padding: 15px;
+            text-align: center;
+            color: #555;
+            font-size: 10px;
+            margin-bottom: 20px;
+        }
+
+        .messages {
+            min-height: 80px;
+            max-height: 80px;
+            overflow: hidden;
+        }
+
+        .message {
+            color: #d6d6d6;
+            font-size: 11px;
+            padding: 8px 0;
+            border-bottom: 1px solid #1a1a1a;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .panel-section {
+            background: #111;
+            border: 1px solid #222;
+            padding: 20px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            color: #666;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .schedule-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .schedule-item:last-child {
+            border-bottom: none;
+        }
+
+        .guest-name {
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .guest-time {
+            color: #555;
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+
+        .guest-topic {
+            color: #666;
+            font-size: 11px;
+            font-style: italic;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            color: #666;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        input, textarea {
+            width: 100%;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            color: #888;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #333;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #4906ff;
+            color: #666;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #222;
+            color: #888;
+        }
+
+        .response-message {
+            margin-top: 15px;
+            padding: 15px;
+            background: #0a0a0a;
+            border: 1px solid #4906ff;
+            color: #666;
+            text-align: center;
+            font-size: 11px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .left-panel, .right-panel {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .left-panel, .right-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="grain"></div>
+    
+    <div class="container">
+        <!-- LEFT PANEL -->
+        <div class="left-panel">
+            <div class="header">
+<div class="logo">
+    <img src="WE DGAF IF THERE IS NO VOLUME.png" alt="Loss Line">
+</div>                <h1>Loss Line</h1>
+                <a href="https://x.com/LossLineSolana" target="_blank" class="twitter-link">@LossLineSolana</a>
+            </div>
+
+            <div class="panel-section">
+                <div class="section-title">Request to Speak</div>
+                <form id="requestForm">
+                    <div class="form-group">
+                        <label for="name">Name or Alias</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="twitter">Twitter</label>
+                        <input type="text" id="twitter" placeholder="@handle">
+                    </div>
+                    <div class="form-group">
+                        <label for="story">Your Story</label>
+                        <textarea id="story" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="wallet">Wallet (Optional)</label>
+                        <input type="text" id="wallet" placeholder="Verification">
+                    </div>
+                    <button type="submit" class="submit-btn">Submit to the Line</button>
+                    <div class="response-message" id="response">
+                        Your voice has been logged. The council will review your request.
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- CENTER PANEL (LIVE) -->
+        <div class="live-section">
+            <div class="live-indicator">
+                <div class="countdown-label">Next Session Begins In</div>
+                <div class="countdown-timer" id="countdown">--:--:--</div>
+            </div>
+
+            <div class="waveform">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+
+            <div class="audio-player">
+                [ STREAM PLACEHOLDER — AUDIO FEED ACTIVE ]
+            </div>
+
+            <div class="messages" id="messages"></div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="right-panel">
+            <div class="panel-section">
+                <div class="section-title">Upcoming Voices</div>
+                <div class="schedule-item">
+                    <div class="guest-name">DEV</div>
+                    <div class="guest-time">Oct 30 — 02:00 UTC</div>
+                    <div class="guest-topic">"The wallet I never recovered."</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Calculate time until next session (always 2 hours ahead, cycles every 2 hours)
+        function getNextSessionTime() {
+            const now = new Date();
+            const currentHour = now.getUTCHours();
+            const currentMinute = now.getUTCMinutes();
+            const currentSecond = now.getUTCSeconds();
+            
+            // Sessions every 2 hours (00:00, 02:00, 04:00, etc.)
+            const nextSessionHour = Math.ceil(currentHour / 2) * 2;
+            
+            const nextSession = new Date(now);
+            nextSession.setUTCHours(nextSessionHour, 0, 0, 0);
+            
+            // If we've passed the next session hour, add 2 hours
+            if (nextSession <= now) {
+                nextSession.setUTCHours(nextSession.getUTCHours() + 2);
+            }
+            
+            return nextSession;
+        }
+
+        function updateCountdown() {
+            const now = new Date();
+            const nextSession = getNextSessionTime();
+            const diff = nextSession - now;
+            
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            const countdownEl = document.getElementById('countdown');
+            countdownEl.textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // Update countdown every second
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Messages system
+        const messages = [
+            "Anonymous caller: lost 14 SOL in one click.",
+            "He says he saw the rug coming but stayed.",
+            "Voice trembling. The story of trust misplaced.",
+            "She held through every red candle.",
+            "One transaction. A lifetime of regret.",
+            "The contract was there. He didn't read it.",
+            "Leverage at 100x. Gone in seconds.",
+            "He's asking why he didn't sell.",
+            "The team disappeared. The tokens remain.",
+            "She believed in the project until the end.",
+            "Anonymous: it was supposed to be different.",
+            "The wallet address no longer responds.",
+            "He remembers the exact moment it all changed."
+        ];
+
+        let messageIndex = 0;
+        const messagesContainer = document.getElementById('messages');
+
+        function addMessage() {
+            const messageEl = document.createElement('div');
+            messageEl.className = 'message';
+            messageEl.textContent = messages[messageIndex];
+            
+            messagesContainer.appendChild(messageEl);
+            
+            if (messagesContainer.children.length > 2) {
+                messagesContainer.removeChild(messagesContainer.firstChild);
+            }
+            
+            messageIndex = (messageIndex + 1) % messages.length;
+        }
+
+        setInterval(addMessage, 4000);
+        addMessage();
+
+        document.getElementById('requestForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const responseEl = document.getElementById('response');
+            responseEl.style.display = 'block';
+            
+            setTimeout(() => {
+                this.reset();
+                responseEl.style.display = 'none';
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
